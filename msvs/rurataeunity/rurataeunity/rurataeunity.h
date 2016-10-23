@@ -1,8 +1,6 @@
 #ifndef _RURATAEUNITY_H_
 #define _RURATAEUNITY_H_
 
-#include "ruratae.h"
-
 #ifdef _WINDLL
 #define EXPORT_API __declspec(dllexport)
 #else

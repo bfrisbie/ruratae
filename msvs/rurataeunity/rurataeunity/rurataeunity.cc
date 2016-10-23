@@ -1,8 +1,6 @@
 #include "rurataeunity.h"
 
-// TODO(bitllama): This is a temporary workaround, |ruratae_t| struct must be
-// visible through the Ruratae public header instead.
-#include "..\src\ruratae.c"
+#include "ruratae.h"
 
 namespace ruratae {
 

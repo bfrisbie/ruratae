@@ -15,12 +15,15 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="rurataeunity.h">
+    <ClInclude Include="..\..\..\include\ruratae.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\util.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="rurataeunity.cc">
+    <ClCompile Include="..\..\..\src\ruratae.c">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
