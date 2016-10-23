@@ -6,19 +6,6 @@
 //=============================================================================
 
 typedef struct _ruratae_t ruratae_t;
-typedef struct _ruratae_drawlist_t ruratae_drawlist_t;
-typedef enum _ruratae_particle_status_t
-{
-  PARTICLE_NOFLAG = 0,
-  PARTICLE_PAUSED = 1 << 0
-}
-ruratae_particle_status_t;
-typedef enum _ruratae_spring_status_t
-{
-  SPRING_NOFLAG = 0,
-  SPRING_PAUSED = 1 << 0
-}
-ruratae_spring_status_t;
 
 //=============================================================================
 // ruratae core api
@@ -44,7 +31,7 @@ void ruratae_process(
   int        num_samps);
 
 /* return pointer to drawlist structure */
-const ruratae_drawlist_t* ruratae_get_drawlist(
+void* ruratae_get_drawlist(
   ruratae_t* p);
 
 /* get the engine's listener position */
@@ -92,8 +79,7 @@ int ruratae_create_particle(
   float      vz, 
   float      recip_mass, 
   float      radius,
-  float      restitution,
-  int        status);
+  float      restitution);
 
 /* destroy particle
    will destroy any associated springs as well */
@@ -168,17 +154,6 @@ void ruratae_set_particle_restitution(
   int        particle_id,
   float      restitution);
 
-/* get particle status flags */
-int ruratae_get_particle_status(
-  ruratae_t* p,
-  int        particle_id);
-
-/* set particle status flags */
-void ruratae_set_particle_status(
-  ruratae_t* p,
-  int        particle_id,
-  int        status);
-
 //=============================================================================
 // springs
 //=============================================================================
@@ -192,8 +167,7 @@ int ruratae_create_spring(
   int        particle_b_id,
   float      stiffness,
   float      damping,
-  float      restlength,
-  int        status);
+  float      restlength);
 
 /* destroy spring */
 void ruratae_destroy_spring(
@@ -232,17 +206,6 @@ void ruratae_set_spring_restlength(
   ruratae_t* p,
   int        spring_id,
   float      restlength);
-
-/* get spring status flags */
-int ruratae_get_spring_status(
-  ruratae_t* p,
-  int        spring_id);
-
-/* set spring status flags */
-void ruratae_set_spring_status(
-  ruratae_t* p,
-  int        spring_id,
-  int        status);
 
 //=============================================================================
 // utility functions

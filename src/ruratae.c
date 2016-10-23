@@ -3,60 +3,7 @@
 #include <string.h>
 
 #include "ruratae.h"
-
-//=============================================================================
-// c data structs
-//=============================================================================
-
-typedef struct _int_stack_t
-{
-  int  max;
-  int  cur;
-  int* arr;
-}
-int_stack_t;
-
-void int_stack_destroy(int_stack_t* p);
-int_stack_t* int_stack_create(int max)
-{
-  int_stack_t* p = (int_stack_t*)malloc(sizeof(int_stack_t));
-  if (NULL == p)
-    goto memory_fault;
-
-  p->max = max;
-  p->cur = -1;
-  p->arr = NULL;
-
-  p->arr = (int*)malloc(sizeof(int) * max);
-  if (NULL == p->arr)
-    goto memory_fault;
-
-  return p;
-
-memory_fault:
-  int_stack_destroy(p);
-  return NULL;
-}
-
-void int_stack_destroy(int_stack_t* p)
-{
-  free(p->arr);
-  free(p);
-}
-
-int int_stack_pop(int_stack_t* p, int* val)
-{
-  if (p->cur >= 0)
-    return (*val = p->arr[p->cur--]);
-  return 0;
-}
-
-int int_stack_push(int_stack_t* p, int val)
-{
-  if (p->cur < p->max - 1)
-    return (p->arr[++p->cur] = val);
-  return 0;
-}
+#include "util.h"
 
 //=============================================================================
 // private datatypes
@@ -75,6 +22,8 @@ typedef struct _ruratae_t
 }
 ruratae_t;
 
+//=============================================================================
+
 typedef struct _ruratae_particle_t
 {
   int   enabled;
@@ -84,9 +33,10 @@ typedef struct _ruratae_particle_t
   float recip_mass;
   float radius;
   float restitution;
-  int   status;
 }
 ruratae_particle_t;
+
+//=============================================================================
 
 typedef struct _ruratae_spring_t
 {
@@ -96,7 +46,6 @@ typedef struct _ruratae_spring_t
   float stiffness;
   float damping;
   float restlength;
-  int   status;
 }
 ruratae_spring_t;
 
@@ -196,7 +145,7 @@ void ruratae_process(
 
 //=============================================================================
 
-const ruratae_drawlist_t* ruratae_get_drawlist(
+void* ruratae_get_drawlist(
   ruratae_t* p)
 {
   (ruratae_t*)p;
@@ -271,8 +220,7 @@ int ruratae_create_particle(
   float      vz,
   float      recip_mass,
   float      radius,
-  float      restitution,
-  int        status)
+  float      restitution)
 {
   int val;
   if (int_stack_pop(p->particle_stack, &val))
@@ -290,7 +238,6 @@ int ruratae_create_particle(
     p->particles[val].recip_mass = recip_mass;
     p->particles[val].radius = radius;
     p->particles[val].restitution = restitution;
-    p->particles[val].status = status;
     return val;
   }
   return -1;
@@ -475,32 +422,6 @@ void ruratae_set_particle_restitution(
 }
 
 //=============================================================================
-
-int ruratae_get_particle_status(
-  ruratae_t* p,
-  int        particle_id)
-{
-  if (particle_id >= 0 &&
-      particle_id < p->particle_stack->max &&
-      p->particles[particle_id].enabled)
-    return p->particles[particle_id].status;
-  return 0;
-}
-
-//=============================================================================
-
-void ruratae_set_particle_status(
-  ruratae_t* p,
-  int        particle_id,
-  int        status)
-{
-  if (particle_id >= 0 &&
-      particle_id < p->particle_stack->max &&
-      p->particles[particle_id].enabled)
-    p->particles[particle_id].status = status;
-}
-
-//=============================================================================
 // springs
 //=============================================================================
 
@@ -510,8 +431,7 @@ int ruratae_create_spring(
   int        particle_b_id,
   float      stiffness,
   float      damping,
-  float      restlength,
-  int        status)
+  float      restlength)
 {
   int val;
   if (particle_a_id >= 0 &&
@@ -528,7 +448,6 @@ int ruratae_create_spring(
     p->springs[val].stiffness = stiffness;
     p->springs[val].damping = damping;
     p->springs[val].restlength = restlength;
-    p->springs[val].status = status;
     return val;
   }
   return -1;
@@ -623,31 +542,5 @@ void ruratae_set_spring_restlength(
       spring_id < p->spring_stack->max &&
       p->springs[spring_id].enabled)
     p->springs[spring_id].restlength = restlength;
-}
-
-//=============================================================================
-
-int ruratae_get_spring_status(
-  ruratae_t* p,
-  int        spring_id)
-{
-  if (spring_id >= 0 &&
-      spring_id < p->spring_stack->max &&
-      p->springs[spring_id].enabled)
-    return p->springs[spring_id].status;
-  return 0;
-}
-
-//=============================================================================
-
-void ruratae_set_spring_status(
-  ruratae_t* p,
-  int        spring_id,
-  int        status)
-{
-  if (spring_id >= 0 &&
-      spring_id < p->spring_stack->max &&
-      p->springs[spring_id].enabled)
-    p->springs[spring_id].status = status;
 }
 
