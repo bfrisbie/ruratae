@@ -21,7 +21,7 @@ struct vec3 {
 extern "C" {
 
 // Initializes the Ruratae system.
-EXPORT_API void Initialize(int max_particles, int max_springs);
+EXPORT_API bool Initialize(int max_particles, int max_springs);
 
 // Shuts down the Ruratae system.
 EXPORT_API void Shutdown();
