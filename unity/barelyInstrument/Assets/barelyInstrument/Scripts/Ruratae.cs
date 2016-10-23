@@ -9,6 +9,9 @@ public static class Ruratae {
   public static void InitializeSystem (int maxParticles, int maxSprings) {
     if (!initialized) {
       initialized = Initialize(maxParticles, maxSprings);
+      if (!initialized) {
+        Debug.LogError("Ruratae failed to initialize");
+      }
     }
   }
 
@@ -28,36 +31,46 @@ public static class Ruratae {
   }
 
   public static void SetListenerPosition (Transform listener) {
-    SetListenerPosition(Vec3FromUnityVector(listener.position));
+    if (initialized) {
+      SetListenerPosition(Vec3FromUnityVector(listener.position));
+    }
   }
 
   public static void SetGravity (Vector3 gravity) {
-    SetGravity(Vec3FromUnityVector(gravity));
+    if (initialized) {
+      SetGravity(Vec3FromUnityVector(gravity));
+    }
   }
 
   public static int CreateParticle (Particle particle) {
-    if(!initialized) {
-      return -1;
+    int id = -1;
+    if (initialized) {
+      Vec3 pos = Vec3FromUnityVector(particle.transform.position);
+      Vec3 vel = Vec3FromUnityVector(particle.velocity);
+      id = CreateParticle(pos, vel, particle.recipMass, particle.radius, particle.restitution);
     }
-    Vec3 pos = Vec3FromUnityVector(particle.transform.position);
-    Vec3 vel = Vec3FromUnityVector(particle.velocity);
-    return CreateParticle(pos, vel, particle.recipMass, particle.radius, particle.restitution);
+    return id;
   }
 
   public static void DestroyParticle (Particle particle) {
-    DestroyParticle(particle.Id);
+    if (initialized) {
+      DestroyParticle(particle.Id);
+    }
   }
 
   public static int CreateSpring (Spring spring) {
-    if(!initialized) {
-      return -1;
+    int id = -1;
+    if (initialized) {
+      id = CreateSpring(spring.particleA.Id, spring.particleB.Id, spring.damping, spring.stiffness, 
+                      spring.restLength);
     }
-    return CreateSpring(spring.particleA.Id, spring.particleB.Id, spring.damping, spring.stiffness, 
-                        spring.restLength);
+    return id;
   }
 
   public static void DestroySpring (Spring spring) {
-    DestroySpring(spring.Id);
+    if (initialized) {
+      DestroySpring(spring.Id);
+    }
   }
 
   // Simple three-dimensional vector.

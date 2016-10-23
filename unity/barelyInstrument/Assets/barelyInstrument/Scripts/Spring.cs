@@ -1,8 +1,9 @@
 ﻿using UnityEngine;
+using UnityEngine.EventSystems;
 using System.Collections;
 
 // Ruratae spring.
-public class Spring : MonoBehaviour {
+public class Spring : MonoBehaviour, IPointerClickHandler {
   public Particle particleA;
 
   public Particle particleB;
@@ -37,8 +38,24 @@ public class Spring : MonoBehaviour {
   }
 
   void Update () {
-    // Update scale.
-    transform.localScale = Vector3.Lerp(transform.localScale, restLength * Vector3.one, 
-                                        8 * Time.deltaTime);
+    if(particleA == null || particleB == null) {
+      GameObject.Destroy(gameObject);
+      return;
+    }
+    SetTransform(particleA.transform.position, particleB.transform.position);
+  }
+
+  public void SetTransform(Vector3 begin, Vector3 end) {
+    Vector3 direction = end - begin;
+    transform.position = 0.5f * (begin + end);
+    transform.rotation = Quaternion.FromToRotation(Vector3.up, direction);
+    float length = 0.5f * direction.magnitude;
+    float thickness = 0.15f * restLength;
+    transform.localScale = new Vector3(thickness, length, thickness);
+  }
+
+  // Implements |IPointerClickHandler.OnPointerClick|.
+  public void OnPointerClick(PointerEventData eventData) {
+    GameObject.Destroy(gameObject);
   }
 }
