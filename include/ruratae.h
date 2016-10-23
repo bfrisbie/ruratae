@@ -5,26 +5,29 @@
 // public datatypes
 //=============================================================================
 
-typedef unsigned long rhandle_t;
 typedef struct _ruratae_t ruratae_t;
-typedef struct _ruratae_drawlist_t 
+typedef struct _ruratae_drawlist_t ruratae_drawlist_t;
+typedef enum _ruratae_particle_status_t
 {
-  rhandle_t* particle_id;
-  float* particle_pos[3];
-  float* particle_vel[3];
-  rhandle_t* springs;
-  rhandle_t* spring_particles[2];
+  PARTICLE_NOFLAG = 0,
+  PARTICLE_PAUSED = 1 << 0
 }
-ruratae_drawlist_t;
+ruratae_particle_status_t;
+typedef enum _ruratae_spring_status_t
+{
+  SPRING_NOFLAG = 0,
+  SPRING_PAUSED = 1 << 0
+}
+ruratae_spring_status_t;
 
 //=============================================================================
-// instrument instance
+// ruratae core api
 //=============================================================================
 
 /* generate a new instrument instance */
 ruratae_t* ruratae_create(
-  unsigned long max_particles, 
-  unsigned long max_springs);
+  int max_particles, 
+  int max_springs);
 
 /* cleanup instrument instance */
 void ruratae_destroy(
@@ -33,12 +36,12 @@ void ruratae_destroy(
 /* integrate and process DSP for instrument
    returns a mono signal and a center of mass position vector */
 void ruratae_process(
-  ruratae_t*    p, 
-  float*        out_buffer,
-  float*        cx,
-  float*        cy,
-  float*        cz,
-  unsigned long num_samps);
+  ruratae_t* p,
+  float*     out_buffer,
+  float*     cx,
+  float*     cy,
+  float*     cz,
+  int        num_samps);
 
 /* return pointer to drawlist structure */
 const ruratae_drawlist_t* ruratae_get_drawlist(
@@ -58,12 +61,9 @@ void ruratae_set_listener_position(
   float      y, 
   float      z);
 
-/* get the engine's gravity setting
-   type: (0 = direction vector, 1 = position vector) */
+/* get the engine's gravity setting */
 void ruratae_get_gravity(
   ruratae_t* p,
-  int*       type,
-  float*     force,
   float*     x,
   float*     y,
   float*     z);
@@ -72,8 +72,6 @@ void ruratae_get_gravity(
    type: (0 = direction vector, 1 = position vector) */
 void ruratae_set_gravity(
   ruratae_t* p,
-  int        type,
-  float      force,
   float      x,
   float      y,
   float      z);
@@ -84,7 +82,7 @@ void ruratae_set_gravity(
 
 /* create a new particle and returns its handle
    returns -1 if unable to create handle */
-rhandle_t ruratae_create_particle(
+int ruratae_create_particle(
   ruratae_t* p,
   float      x, 
   float      y, 
@@ -93,29 +91,20 @@ rhandle_t ruratae_create_particle(
   float      vy, 
   float      vz, 
   float      recip_mass, 
-  float      radius);
+  float      radius,
+  float      restitution,
+  int        status);
 
 /* destroy particle
    will destroy any associated springs as well */
 void ruratae_destroy_particle(
   ruratae_t* p, 
-  rhandle_t  particle_id);
-
-/* get particle status (1 = enabled / 0 = disabled) */
-int ruratae_get_particle_status(
-  ruratae_t* p, 
-  rhandle_t  particle_id);
-
-/* set particle status (1 = enabled / 0 = disabled) */
-void ruratae_get_particle_status(
-  ruratae_t* p, 
-  rhandle_t  particle_id, 
-  int        status);
+  int        particle_id);
 
 /* get particle position */
 void ruratae_get_particle_position(
   ruratae_t* p, 
-  rhandle_t  particle_id, 
+  int        particle_id, 
   float*     x, 
   float*     y, 
   float*     z);
@@ -123,7 +112,7 @@ void ruratae_get_particle_position(
 /* set particle position */
 void ruratae_set_particle_position(
   ruratae_t* p, 
-  rhandle_t  particle_id, 
+  int        particle_id, 
   float      x,
   float      y, 
   float      z);
@@ -131,7 +120,7 @@ void ruratae_set_particle_position(
 /* get particle velocity */
 void ruratae_get_particle_velocity(
   ruratae_t* p, 
-  rhandle_t  particle_id, 
+  int        particle_id, 
   float*     vx, 
   float*     vy, 
   float*     vz);
@@ -139,34 +128,56 @@ void ruratae_get_particle_velocity(
 /* set particle velocity */
 void ruratae_set_particle_velocity(
   ruratae_t* p, 
-  rhandle_t  particle_id, 
+  int        particle_id, 
   float      vx, 
   float      vy, 
   float      vz);
 
 /* get particle reciprocal mass
    set to 0 for stationary particle */
-float ruratae_get_particle_reciprocal_mass(
+float ruratae_get_particle_recip_mass(
   ruratae_t* p, 
-  rhandle_t  particle_id);
+  int        particle_id);
 
 /* set particle reciprocal mass
    set to 0 for stationary particle */
-void ruratae_set_particle_reciprocal_mass(
+void ruratae_set_particle_recip_mass(
   ruratae_t* p, 
-  rhandle_t  particle_id, 
+  int        particle_id, 
   float      recip_mass);
 
 /* get particle radius */
 float ruratae_get_particle_radius(
   ruratae_t* p, 
-  rhandle_t  particle_id);
+  int        particle_id);
 
 /* set particle radius */
-void ruratae_get_particle_radius(
+void ruratae_set_particle_radius(
   ruratae_t* p, 
-  rhandle_t  particle_id, 
+  int        particle_id, 
   float      radius);
+
+/* get particle inellastic restitution */
+float ruratae_get_particle_restitution(
+  ruratae_t* p,
+  int        particle_id);
+
+/* set particle inellastic restitution */
+void ruratae_set_particle_restitution(
+  ruratae_t* p,
+  int        particle_id,
+  float      restitution);
+
+/* get particle status flags */
+int ruratae_get_particle_status(
+  ruratae_t* p,
+  int        particle_id);
+
+/* set particle status flags */
+void ruratae_set_particle_status(
+  ruratae_t* p,
+  int        particle_id,
+  int        status);
 
 //=============================================================================
 // springs
@@ -175,62 +186,63 @@ void ruratae_get_particle_radius(
 /* create a new spring and returns its handle
    requires two handles for associated particles
    returns -1 if unable to create handle */
-rhandle_t ruratae_create_spring(
+int ruratae_create_spring(
   ruratae_t* p, 
-  rhandle_t  particle_A_id, 
-  rhandle_t  particle_B_id,
+  int        particle_a_id, 
+  int        particle_b_id,
   float      stiffness,
   float      damping,
-  float      restlength);
+  float      restlength,
+  int        status);
 
 /* destroy spring */
 void ruratae_destroy_spring(
   ruratae_t* p, 
-  rhandle_t  spring_id);
-
-/* get spring status (1 = enabled / 0 = disabled) */
-int ruratae_get_spring_status(
-  ruratae_t* p, 
-  rhandle_t  spring_id);
-
-/* set spring status (1 = enabled / 0 = disabled) */
-void ruratae_get_spring_status(
-  ruratae_t* p, 
-  rhandle_t  spring_id, 
-  int        status);
+  int        spring_id);
 
 /* get spring stiffness */
 float ruratae_get_spring_stiffness(
   ruratae_t* p, 
-  rhandle_t  spring_id);
+  int        spring_id);
 
 /* set spring stiffness */
 void ruratae_set_spring_stiffness(
   ruratae_t* p, 
-  rhandle_t  spring_id, 
+  int        spring_id,
   float      stiffness);
 
 /* get spring damping */
 float ruratae_get_spring_damping(
   ruratae_t* p, 
-  rhandle_t  spring_id);
+  int        spring_id);
 
 /* set spring damping */
 void ruratae_set_spring_damping(
   ruratae_t* p, 
-  rhandle_t  spring_id, 
+  int        spring_id,
   float      damping);
 
 /* get spring restlength */
 float ruratae_get_spring_restlength(
   ruratae_t* p,
-  rhandle_t  spring_id);
+  int        spring_id);
 
 /* set spring restlength */
 void ruratae_set_spring_restlength(
   ruratae_t* p,
-  rhandle_t  spring_id,
+  int        spring_id,
   float      restlength);
+
+/* get spring status flags */
+int ruratae_get_spring_status(
+  ruratae_t* p,
+  int        spring_id);
+
+/* set spring status flags */
+void ruratae_set_spring_status(
+  ruratae_t* p,
+  int        spring_id,
+  int        status);
 
 //=============================================================================
 // utility functions
