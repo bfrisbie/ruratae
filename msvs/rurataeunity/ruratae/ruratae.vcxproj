@@ -134,7 +134,9 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\include\ruratae.h" />
+    <ClInclude Include="..\..\..\include\ruratae.hpp" />
     <ClInclude Include="..\..\..\src\util.h" />
+    <ClInclude Include="..\..\..\src\util.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\src\ruratae.c">
