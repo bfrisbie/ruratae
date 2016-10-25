@@ -32,5 +32,8 @@
     <ClCompile Include="..\..\..\src\ruratae.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\src\ruratae.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

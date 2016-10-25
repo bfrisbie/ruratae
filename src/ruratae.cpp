@@ -2,6 +2,47 @@
 
 using namespace ruratae;
 
+//=========================================================================
+// private structures
+//=========================================================================
+struct instrument::set_msg
+{
+  enum _setmsgtype
+  {
+    INSTRUMENT_LISTENER,
+    INSTRUMENT_GRAVITY,
+    PARTICLE_CREATE,
+    PARTICLE_DESTROY,
+    PARTICLE_POSITION,
+    PARTICLE_VELOCITY,
+    PARTICLE_RECIPMASS,
+    PARTICLE_RADIUS,
+    PARTICLE_ELASTICITY,
+    SPRING_CREATE,
+    SPRING_DESTROY,
+    SPRING_PARTICLEA,
+    SPRING_PARTICLEB,
+    SPRING_STIFFNESS,
+    SPRING_DAMPING,
+    SPRING_RESTLENGTH,
+    INVALID_MSG
+  };
+  int   type;
+  int   handle;
+  union
+  {
+    int             val_i32;
+    float           val_f32;
+    vec3            val_vec3;
+    particle_params val_pp;
+    spring_params   val_sp;
+  };
+  set_msg(int _type = INVALID_MSG) : type(_type) {}
+};
+
+//=========================================================================
+// core
+//=========================================================================
 instrument::instrument(int max_particles, int max_springs)
   : 
   m_particle_internal(max_particles),
@@ -264,41 +305,6 @@ void instrument::set_spring_restlength(int handle, float v)
 //=========================================================================
 // private methods
 //=========================================================================
-struct instrument::set_msg
-{
-  enum _setmsgtype
-  {
-    INSTRUMENT_LISTENER,
-    INSTRUMENT_GRAVITY,
-    PARTICLE_CREATE,
-    PARTICLE_DESTROY,
-    PARTICLE_POSITION,
-    PARTICLE_VELOCITY,
-    PARTICLE_RECIPMASS,
-    PARTICLE_RADIUS,
-    PARTICLE_ELASTICITY,
-    SPRING_CREATE,
-    SPRING_DESTROY,
-    SPRING_PARTICLEA,
-    SPRING_PARTICLEB,
-    SPRING_STIFFNESS,
-    SPRING_DAMPING,
-    SPRING_RESTLENGTH,
-    INVALID_MSG
-  };
-  int   type;
-  int   handle;
-  union
-  {
-    int             val_i32;
-    float           val_f32;
-    vec3            val_vec3;
-    particle_params val_pp;
-    spring_params   val_sp;
-  };
-  set_msg(int _type = INVALID_MSG) : type(_type) {}
-}; 
-
 void instrument::mfn_process_queue_item(const set_msg& msg)
 {
   if (msg.type == instrument::set_msg::INSTRUMENT_LISTENER)
