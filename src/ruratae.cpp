@@ -1,10 +1,33 @@
 #include "ruratae.hpp"
 
-using namespace ruratae;
-
+namespace ruratae
+{
 //=========================================================================
 // private structures
 //=========================================================================
+struct particle
+{
+  bool enabled;
+  vec3 p;
+  vec3 v;
+  vec3 a;
+  float rm;
+  float rad;
+  float el;
+};
+
+struct spring
+{
+  bool enabled;
+  particle* a;
+  particle* b;
+  float k;
+  float c;
+  float L;
+  int a_handle;
+  int b_handle;
+};
+
 struct instrument::set_msg
 {
   enum _setmsgtype
@@ -44,7 +67,7 @@ struct instrument::set_msg
 // core
 //=========================================================================
 instrument::instrument(int max_particles, int max_springs)
-  : 
+  :
   m_particle_internal(max_particles),
   m_spring_internal(max_springs)
 {
@@ -142,6 +165,7 @@ void instrument::destroy_particle(int handle)
 vec3 instrument::get_particle_position(int handle)
 {
   //TODO: ensure handle is valid before processing...
+  return m_particle_internal[handle].p;
 }
 
 void instrument::set_particle_position(int handle, const vec3& v)
@@ -156,6 +180,7 @@ void instrument::set_particle_position(int handle, const vec3& v)
 vec3 instrument::get_particle_velocity(int handle)
 {
   //TODO: ensure handle is valid before processing...
+  return m_particle_internal[handle].v;
 }
 
 void instrument::set_particle_velocity(int handle, const vec3& v)
@@ -170,6 +195,7 @@ void instrument::set_particle_velocity(int handle, const vec3& v)
 float instrument::get_particle_reciprocal_mass(int handle)
 {
   //TODO: ensure handle is valid before processing...
+  return m_particle_internal[handle].rm;
 }
 
 void instrument::set_particle_reciprocal_mass(int handle, float v)
@@ -184,6 +210,7 @@ void instrument::set_particle_reciprocal_mass(int handle, float v)
 float instrument::get_particle_radius(int handle)
 {
   //TODO: ensure handle is valid before processing...
+  return m_particle_internal[handle].rad;
 }
 
 void instrument::set_particle_radius(int handle, float v)
@@ -198,6 +225,7 @@ void instrument::set_particle_radius(int handle, float v)
 float instrument::get_particle_elasticity(int handle)
 {
   //TODO: ensure handle is valid before processing...
+  return m_particle_internal[handle].el;
 }
 
 void instrument::set_particle_elasticity(int handle, float v)
@@ -235,6 +263,7 @@ void instrument::destroy_spring(int handle)
 int instrument::get_spring_particle_a(int handle)
 {
   //TODO: ensure handle is valid before processing...
+  return m_spring_internal[handle].a_handle;
 }
 
 void instrument::set_spring_particle_a(int handle, int particle_handle)
@@ -249,6 +278,7 @@ void instrument::set_spring_particle_a(int handle, int particle_handle)
 int instrument::get_spring_particle_b(int handle)
 {
   //TODO: ensure handle is valid before processing...
+  return m_spring_internal[handle].b_handle;
 }
 
 void instrument::set_spring_particle_b(int handle, int particle_handle)
@@ -263,6 +293,7 @@ void instrument::set_spring_particle_b(int handle, int particle_handle)
 float instrument::get_spring_stiffness(int handle)
 {
   //TODO: ensure handle is valid before processing...
+  return m_spring_internal[handle].k;
 }
 
 void instrument::set_spring_stiffness(int handle, float v)
@@ -277,6 +308,7 @@ void instrument::set_spring_stiffness(int handle, float v)
 float instrument::get_spring_damping(int handle)
 {
   //TODO: ensure handle is valid before processing...
+  return m_spring_internal[handle].c;
 }
 
 void instrument::set_spring_damping(int handle, float v)
@@ -291,6 +323,7 @@ void instrument::set_spring_damping(int handle, float v)
 float instrument::get_spring_restlength(int handle)
 {
   //TODO: ensure handle is valid before processing...
+  return m_spring_internal[handle].L;
 }
 
 void instrument::set_spring_restlength(int handle, float v)
@@ -317,62 +350,81 @@ void instrument::mfn_process_queue_item(const set_msg& msg)
   }
   else if (msg.type == instrument::set_msg::PARTICLE_CREATE)
   {
-    //TODO
+    particle p;
+    p.enabled = true;
+    p.p = msg.val_pp.position;
+    p.v = msg.val_pp.velocity;
+    p.rm = msg.val_pp.reciprocal_mass;
+    p.rad = msg.val_pp.radius;
+    p.el = msg.val_pp.elasticity;
+    m_particle_internal[msg.handle] = p;
   }
   else if (msg.type == instrument::set_msg::PARTICLE_DESTROY)
   {
-    //TODO
+    m_particle_internal[msg.handle].enabled = false;
   }
   else if (msg.type == instrument::set_msg::PARTICLE_POSITION)
   {
-    //TODO
+    m_particle_internal[msg.handle].p = msg.val_vec3;
   }
   else if (msg.type == instrument::set_msg::PARTICLE_VELOCITY)
   {
-    //TODO
+    m_particle_internal[msg.handle].v = msg.val_vec3;
   }
   else if (msg.type == instrument::set_msg::PARTICLE_RECIPMASS)
   {
-    //TODO
+    m_particle_internal[msg.handle].rm = msg.val_f32;
   }
   else if (msg.type == instrument::set_msg::PARTICLE_RADIUS)
   {
-    //TODO
+    m_particle_internal[msg.handle].rad = msg.val_f32;
   }
   else if (msg.type == instrument::set_msg::PARTICLE_ELASTICITY)
   {
-    //TODO
+    m_particle_internal[msg.handle].el = msg.val_f32;
   }
   else if (msg.type == instrument::set_msg::SPRING_CREATE)
   {
-    //TODO
+    spring s;
+    s.enabled = true;
+    s.a = &m_particle_internal[msg.val_sp.particle_a];
+    s.b = &m_particle_internal[msg.val_sp.particle_b];
+    s.k = msg.val_sp.stiffness;
+    s.c = msg.val_sp.damping;
+    s.L = msg.val_sp.restlength;
+    s.a_handle = msg.val_sp.particle_a;
+    s.b_handle = msg.val_sp.particle_b;
+    m_spring_internal[msg.handle] = s;
   }
   else if (msg.type == instrument::set_msg::SPRING_DESTROY)
   {
-    //TODO
+    m_spring_internal[msg.handle].enabled = false;
   }
   else if (msg.type == instrument::set_msg::SPRING_PARTICLEA)
   {
-    //TODO
+    m_spring_internal[msg.handle].a = &m_particle_internal[msg.val_i32];
+    m_spring_internal[msg.handle].a_handle = msg.val_i32;
   }
   else if (msg.type == instrument::set_msg::SPRING_PARTICLEB)
   {
-    //TODO
+    m_spring_internal[msg.handle].b = &m_particle_internal[msg.val_i32];
+    m_spring_internal[msg.handle].b_handle = msg.val_i32;
   }
   else if (msg.type == instrument::set_msg::SPRING_STIFFNESS)
   {
-    //TODO
+    m_spring_internal[msg.handle].k = msg.val_f32;
   }
   else if (msg.type == instrument::set_msg::SPRING_DAMPING)
   {
-    //TODO
+    m_spring_internal[msg.handle].c = msg.val_f32;
   }
   else if (msg.type == instrument::set_msg::SPRING_RESTLENGTH)
   {
-    //TODO
+    m_spring_internal[msg.handle].L = msg.val_f32;
   }
   else if (msg.type == instrument::set_msg::INVALID_MSG)
   {
-    //TODO
+    //TODO: throw an error?
   }
+}
 }
