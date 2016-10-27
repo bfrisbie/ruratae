@@ -10,7 +10,7 @@ struct particle
   bool enabled;
   vec3 p;
   vec3 v;
-  vec3 a;
+  vec3 f;
   float rm;
   float rad;
   float el;
@@ -63,6 +63,75 @@ struct instrument::set_msg
   set_msg(int _type = INVALID_MSG) : type(_type) {}
 };
 
+void process_spring(const spring& s)
+{
+  particle& a = *(s.a);
+  particle& b = *(s.b);
+  vec3 dp(b.p.x - a.p.x, b.p.y - a.p.y, b.p.z - a.p.z);
+  vec3 dv(b.v.x - a.v.x, b.v.y - a.v.y, b.v.z - a.v.z);
+  float recip_len = 
+    1.0f / sqrtf(dp.x * dp.x + dp.y * dp.y + dp.z * dp.z);
+  vec3 f(-s.k * dp.x + s.k * s.L * dp.x * recip_len - s.c * dv.x,
+         -s.k * dp.y + s.k * s.L * dp.y * recip_len - s.c * dv.y,
+         -s.k * dp.z + s.k * s.L * dp.z * recip_len - s.c * dv.z);
+  a.f.x += f.x;
+  a.f.y += f.y;
+  a.f.z += f.z;
+  b.f.x -= f.x;
+  b.f.y -= f.y;
+  b.f.z -= f.z;
+}
+
+void process_particle(particle& p, float dt)
+{
+  const float drag = 0.997f;
+  p.v.x += p.f.x * dt * dt * p.rm * drag;
+  p.v.y += p.f.y * dt * dt * p.rm * drag;
+  p.v.z += p.f.z * dt * dt * p.rm * drag;
+  p.p.x += p.v.x;
+  p.p.x += p.v.y;
+  p.p.x += p.v.z;
+  p.f.x = 0.0f;
+  p.f.y = 0.0f;
+  p.f.z = 0.0f;
+}
+
+void process_sample(
+  std::vector<spring>& springs, 
+  std::vector<particle>& particles, float dt)
+{
+  for (int i = 0; i < springs.size(); i++)
+  {
+    if (springs[i].enabled)
+      process_spring(springs[i]);
+  }
+  for (int i = 0; i < particles.size(); i++)
+  {
+    if (particles[i].enabled)
+      process_particle(particles[i], dt);
+  }
+}
+
+float listento_sample(
+  std::vector<particle>& particles, const vec3& listener)
+{
+  float output = 0.0f;
+  for (int i = 0; i < particles.size(); i++)
+  {
+    vec3 dp(listener.x - particles[i].p.x,
+            listener.y - particles[i].p.y,
+            listener.z - particles[i].p.z);
+    float recip_sqr_len = 
+      1.0f / (dp.x * dp.x + dp.y * dp.y + dp.z * dp.z);
+    float pressure =
+      (dp.x * particles[i].v.x + 
+       dp.y * particles[i].v.y + 
+       dp.z * particles[i].v.z) * recip_sqr_len;
+    output += pressure;
+  }
+  return output;
+}
+
 //=========================================================================
 // core
 //=========================================================================
@@ -100,9 +169,11 @@ vec3 instrument::process(float* out_buffer, int num_samps)
   }
 
   //TODO: real DSP here...
+  const float dt = 1.0f / 96000.0f;
   for (int i = 0; i < num_samps; i++)
   {
-    *out_buffer++ = 0.0f;
+    process_sample(m_spring_internal, m_particle_internal, dt);
+    *out_buffer++ = listento_sample(m_particle_internal, m_listener);
   }
 }
 
