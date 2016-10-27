@@ -19,6 +19,19 @@ struct particle_params
   float reciprocal_mass;
   float radius;
   float elasticity;
+
+	particle_params(
+		vec3 _position = vec3(0),
+		vec3 _velocity = vec3(0),
+		float _reciprocal_mass = 0.0f,
+		float _radius = 0.0f,
+		float _elasticity = 0.0f) :
+		position(_position),
+		velocity(_velocity),
+		reciprocal_mass(_reciprocal_mass),
+		radius(_radius),
+		elasticity(_elasticity)
+	{}
 };
 
 struct spring_params
@@ -28,10 +41,21 @@ struct spring_params
   float stiffness;
   float damping;
   float restlength;
+
+	spring_params(
+		int _particle_a = 0, 
+		int _particle_b = 0, 
+		float _stiffness = 0.0f, 
+		float _damping = 0.0f, 
+		float _restlength = 0.0f) :
+		particle_a(_particle_a),
+		particle_b(_particle_b),
+		stiffness(_stiffness),
+		damping(_damping),
+		restlength(_restlength)
+	{}
 };
 
-struct particle;
-struct spring;
 class instrument
 {
 public:
@@ -93,7 +117,78 @@ public:
   void set_spring_restlength(int handle, float v);
 
 private:
-  struct set_msg;
+  struct particle
+  {
+    bool enabled;
+    vec3 p;
+    vec3 v;
+    vec3 f;
+    float rm;
+    float rad;
+    float el;
+  };
+
+  struct spring
+  {
+    bool enabled;
+    particle* a;
+    particle* b;
+    float k;
+    float c;
+    float L;
+    int a_handle;
+    int b_handle;
+  };
+
+  struct set_msg
+  {
+    enum _setmsgtype
+    {
+      INSTRUMENT_LISTENER,
+      INSTRUMENT_GRAVITY,
+      PARTICLE_CREATE,
+      PARTICLE_DESTROY,
+      PARTICLE_POSITION,
+      PARTICLE_VELOCITY,
+      PARTICLE_RECIPMASS,
+      PARTICLE_RADIUS,
+      PARTICLE_ELASTICITY,
+      SPRING_CREATE,
+      SPRING_DESTROY,
+      SPRING_PARTICLEA,
+      SPRING_PARTICLEB,
+      SPRING_STIFFNESS,
+      SPRING_DAMPING,
+      SPRING_RESTLENGTH,
+      INVALID_MSG
+    };
+    int   type;
+    int   handle;
+    union
+    {
+      int             val_i32;
+      float           val_f32;
+      vec3            val_vec3;
+      particle_params val_pp;
+      spring_params   val_sp;
+    };
+    set_msg(int _type) : type(_type) {}
+		set_msg(const set_msg& v)
+		{
+			memcpy(this, &v, sizeof(set_msg));
+		}
+		set_msg& operator= (const set_msg& v)
+		{
+			memcpy(this, &v, sizeof(set_msg));
+			return *this;
+		}
+  };
+  void mfn_process_spring(const spring& s);
+  void mfn_process_particle(particle& p, float dt);
+  void mfn_process_sample(std::vector<spring>& springs,
+    std::vector<particle>& particles, float dt);
+  float mfn_listento_sample(std::vector<particle>& particles,
+    const vec3& listener);
   void mfn_process_queue_item(const set_msg& msg);
   threadsafe_queue<set_msg> m_setter_queue;
   std::vector<particle> m_particle_internal;

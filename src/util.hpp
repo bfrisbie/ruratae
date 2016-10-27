@@ -23,7 +23,8 @@ namespace ruratae
       m_mutex.lock();
       if (m_stack.size())
       {
-        v = m_stack.pop();
+        v = m_stack.top();
+        m_stack.pop();
         m_mutex.unlock();
         return true;
       }
@@ -46,7 +47,7 @@ namespace ruratae
       return false;
     }
 
-    size_t size() const
+    size_t size()
     {
       m_mutex.lock();
       size_t s = m_stack.size();
@@ -89,7 +90,8 @@ namespace ruratae
       {
         if (m_queue.size())
         {
-          v = m_queue.pop();
+          v = m_queue.front();
+          m_queue.pop();
           m_mutex.unlock();
           return true;
         }
@@ -98,7 +100,7 @@ namespace ruratae
       return false;
     }
 
-    size_t size() const
+    size_t size()
     {
       m_mutex.lock();
       size_t s = m_queue.size();
