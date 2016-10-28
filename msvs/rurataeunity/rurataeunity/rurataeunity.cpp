@@ -49,7 +49,7 @@ void SetParticleRadius(int particle_id, float radius) {
 }
 
 void SetParticleVelocity(int particle_id, vec3 velocity) {
-  ruratae->set_particle_position(particle_id, velocity);
+  ruratae->set_particle_velocity(particle_id, velocity);
 }
 
 // TODO(anokta): It's probably better to minimize the params for create calls,
