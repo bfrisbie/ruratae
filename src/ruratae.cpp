@@ -337,16 +337,19 @@ float instrument::mfn_listento_sample(
   float output = 0.0f;
   for (int i = 0; i < particles.size(); i++)
   {
-    vec3 dp(listener.x - particles[i].p.x,
-      listener.y - particles[i].p.y,
-      listener.z - particles[i].p.z);
-    float recip_sqr_len =
-      1.0f / (dp.x * dp.x + dp.y * dp.y + dp.z * dp.z);
-    float pressure =
-      (dp.x * particles[i].v.x +
-        dp.y * particles[i].v.y +
-        dp.z * particles[i].v.z) * recip_sqr_len;
-    output += pressure;
+		if (particles[i].enabled && particles[i].rm > 0.0f)
+		{
+			vec3 dp(listener.x - particles[i].p.x,
+				listener.y - particles[i].p.y,
+				listener.z - particles[i].p.z);
+			float recip_sqr_len =
+				1.0f / (dp.x * dp.x + dp.y * dp.y + dp.z * dp.z);
+			float pressure =
+				(dp.x * particles[i].v.x +
+					dp.y * particles[i].v.y +
+					dp.z * particles[i].v.z) * recip_sqr_len;
+			output += pressure;
+		}
   }
   return output;
 }

@@ -8,12 +8,12 @@ int main(int argc, char* argv[])
   int b = instr.create_particle(ruratae::particle_params(
 		ruratae::vec3(1, 0, 0), ruratae::vec3(0), 1.0f));
 	int c = instr.create_spring(ruratae::spring_params(a, b, 3000000, 2000000));
-  for (int i = 0; i < 96000; i++)
+	instr.set_listener(ruratae::vec3(0, 1, 0));
+  for (int i = 0; i < 100; i++)
   {
     float out;
-    ruratae::vec3 xp = instr.get_particle_position(b);
-    printf("%f\n", &out);
     instr.process(&out, 1);
-  }
+		printf("%f\n", out * 100);
+	}
   return 0;
 }
