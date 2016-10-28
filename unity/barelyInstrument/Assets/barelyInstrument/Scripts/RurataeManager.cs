@@ -47,7 +47,6 @@ public class RurataeManager : MonoBehaviour {
   void OnAudioFilterRead(float[] data, int channels) {
     Ruratae.Process(monoData);
     for(int frame = 0; frame < monoData.Length; ++frame) {
-      Debug.Log(monoData[frame]);
       for(int ch = 0; ch < channels; ++ch) {
         data[channels * frame + ch] = monoData[frame];
       }
