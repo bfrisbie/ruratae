@@ -91,9 +91,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   velocity: {x: 0, y: 0, z: 0}
-  recipMass: 0
+  recipMass: 1
   radius: 1
-  restitution: 0
+  elasticity: 0
 --- !u!135 &135000013549774362
 SphereCollider:
   m_ObjectHideFlags: 1

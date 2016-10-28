@@ -20,17 +20,38 @@ public class RurataeManager : MonoBehaviour {
   // Gravity.
   public Vector3 gravity = Vector3.zero;
 
+  // TODO(anokta): Refactor this to an instrument structure.
+  [SerializeField]
+  private AudioSource source = null;
+  private float[] monoData = null;
+
   void Awake () {
+    if(source == null) {
+      source = gameObject.AddComponent<AudioSource>();
+      int numFrames = AudioSettings.GetConfiguration().dspBufferSize;
+      monoData = new float[numFrames];
+    }
     Ruratae.InitializeSystem(maxParticles, maxSprings);
   }
 
   void OnDestroy () {
     Ruratae.ShutdownSystem();
+    monoData = null;
   }
 
   void Update () {
     Ruratae.SetListenerPosition(listener);
     Ruratae.SetGravity(gravity);
+  }
+
+  void OnAudioFilterRead(float[] data, int channels) {
+    Ruratae.Process(monoData);
+    for(int frame = 0; frame < monoData.Length; ++frame) {
+      Debug.Log(monoData[frame]);
+      for(int ch = 0; ch < channels; ++ch) {
+        data[channels * frame + ch] = monoData[frame];
+      }
+    }
   }
 
   public Particle InstantiateParticle (Vector3 position) {

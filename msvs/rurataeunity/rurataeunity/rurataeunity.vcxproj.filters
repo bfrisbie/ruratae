@@ -20,7 +20,7 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="rurataeunity.cc">
+    <ClCompile Include="rurataeunity.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

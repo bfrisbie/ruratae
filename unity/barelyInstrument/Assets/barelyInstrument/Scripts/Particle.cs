@@ -8,9 +8,9 @@ public class Particle : MonoBehaviour, IPointerDownHandler, IPointerUpHandler, I
 
   public float recipMass = 0.0f;
 
-  public float radius = 1.0f;
+  public float radius = 0.0f;
 
-  public float restitution = 0.0f;
+  public float elasticity = 0.0f;
 
   // Unique id.
   public int Id {
@@ -40,26 +40,31 @@ public class Particle : MonoBehaviour, IPointerDownHandler, IPointerUpHandler, I
 
   void Update () {
     // Update scale.
-    transform.localScale = Vector3.Lerp(transform.localScale, radius * Vector3.one, 
-                                        4 * Time.deltaTime);
+    //transform.localScale = Vector3.Lerp(transform.localScale, radius * Vector3.one, 
+    //                                    4 * Time.deltaTime);
+    transform.GetComponent<Renderer>().material.color = (0.5f + recipMass) * Color.white;
+    // Update parameters.
+    Ruratae.SetParticleParams(this);
   }
 
   // Implements |IPointerDownHandler.OnPointerDown|.
   public void OnPointerDown (PointerEventData eventData) {
-    Vector3 position = WorldFromScreenPosition(eventData.pressEventCamera, eventData.pressPosition);
+    Vector3 position =  WorldFromScreenPosition(eventData.pressEventCamera, eventData.pressPosition);
     pressOffset = transform.position - position;
   }
 
   // Implements |IPointerUpHandler.OnPointerUp|.
   public void OnPointerUp (PointerEventData eventData) {
-    if (!eventData.dragging) {
+    if (Input.GetMouseButtonUp(1)) {
+      recipMass = 1.0f - recipMass;
+    } else if (!eventData.dragging) {
       GameObject.Destroy(gameObject);
     }
   }
 
   // Implements |IDragHandler.OnDrag|.
   public void OnDrag (PointerEventData eventData) {
-    if (Input.GetKey(KeyCode.LeftControl)) {
+    if (Input.GetKey(KeyCode.LeftControl) || recipMass == 0.0f) {
       return;
     }
     Vector3 position = WorldFromScreenPosition(eventData.pressEventCamera, eventData.position);

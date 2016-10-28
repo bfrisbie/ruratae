@@ -8,11 +8,11 @@ public class Spring : MonoBehaviour, IPointerClickHandler {
 
   public Particle particleB;
 
-  public float stiffness = 0.0f;
+  public float stiffness = 3000000.0f;
 
-  public float damping = 0.0f;
+  public float damping = 2000000.0f;
 
-  public float restLength = 1.0f;
+  public float restLength = 0.0f;
 
   // Unique id.
   public int Id {
@@ -50,7 +50,7 @@ public class Spring : MonoBehaviour, IPointerClickHandler {
     transform.position = 0.5f * (begin + end);
     transform.rotation = Quaternion.FromToRotation(Vector3.up, direction);
     float length = 0.5f * direction.magnitude;
-    float thickness = 0.15f * restLength;
+    float thickness = 0.15f; // * restLength;
     transform.localScale = new Vector3(thickness, length, thickness);
   }
 

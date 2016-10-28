@@ -8,10 +8,8 @@ public static class Ruratae {
   // Initializes the system.
   public static void InitializeSystem (int maxParticles, int maxSprings) {
     if (!initialized) {
-      initialized = Initialize(maxParticles, maxSprings);
-      if (!initialized) {
-        Debug.LogError("Ruratae failed to initialize");
-      }
+      Initialize(maxParticles, maxSprings);
+      initialized = true;
     }
   }
 
@@ -47,7 +45,7 @@ public static class Ruratae {
     if (initialized) {
       Vec3 pos = Vec3FromUnityVector(particle.transform.position);
       Vec3 vel = Vec3FromUnityVector(particle.velocity);
-      id = CreateParticle(pos, vel, particle.recipMass, particle.radius, particle.restitution);
+      id = CreateParticle(pos, vel, particle.recipMass, particle.radius, particle.elasticity);
     }
     return id;
   }
@@ -58,11 +56,19 @@ public static class Ruratae {
     }
   }
 
+  public static void SetParticleParams (Particle particle) {
+    if (initialized && particle.Id != -1) {
+      SetParticlePosition(particle.Id, Vec3FromUnityVector(particle.transform.position));
+      SetParticleRadius(particle.Id, particle.radius);
+      SetParticlePosition(particle.Id, Vec3FromUnityVector(particle.velocity));
+    }
+  }
+
   public static int CreateSpring (Spring spring) {
     int id = -1;
     if (initialized) {
       id = CreateSpring(spring.particleA.Id, spring.particleB.Id, spring.damping, spring.stiffness, 
-                      spring.restLength);
+                        spring.restLength);
     }
     return id;
   }
@@ -100,7 +106,7 @@ public static class Ruratae {
 
   // System handlers.
   [DllImport(pluginName)]
-  private static extern bool Initialize (int maxParticles, int maxSprings);
+  private static extern void Initialize (int maxParticles, int maxSprings);
 
   [DllImport(pluginName)]
   private static extern void Shutdown ();
@@ -121,6 +127,15 @@ public static class Ruratae {
 
   [DllImport(pluginName)]
   private static extern void DestroyParticle (int particleId);
+
+  [DllImport(pluginName)]
+  private static extern int SetParticlePosition (int particleId, Vec3 position);
+
+  [DllImport(pluginName)]
+  private static extern int SetParticleRadius (int particleId, float radius);
+
+  [DllImport(pluginName)]
+  private static extern int SetParticleVelocity (int particleId, Vec3 velocity);
 
   // Spring handlers.
   [DllImport(pluginName)]

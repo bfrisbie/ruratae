@@ -19,7 +19,8 @@ public class InputManager : MonoBehaviour {
   private Particle selectedParticle = null;
 
   void Awake () {
-    drawSpring = rurataeManager.InstantiateSpring(null, null);
+    drawSpring = 
+      ((GameObject)GameObject.Instantiate(rurataeManager.springPrefab)).GetComponent<Spring>();
     drawSpring.enabled = false;
     drawSpring.SetTransform(Vector3.zero, Vector3.zero);
   }

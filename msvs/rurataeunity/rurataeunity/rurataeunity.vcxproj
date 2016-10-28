@@ -144,7 +144,7 @@
     <ClInclude Include="rurataeunity.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="rurataeunity.cc">
+    <ClCompile Include="rurataeunity.cpp">
       <CompileAs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Default</CompileAs>
       <CompileAs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Default</CompileAs>
       <CompileAs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Default</CompileAs>

@@ -12,7 +12,7 @@ int main(int argc, char* argv[])
   {
     float out;
     ruratae::vec3 xp = instr.get_particle_position(b);
-    printf("%f\n", xp.x);
+    printf("%f\n", &out);
     instr.process(&out, 1);
   }
   return 0;

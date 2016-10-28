@@ -31,7 +31,7 @@ vec3 instrument::process(float* out_buffer, int num_samps)
   // !!! NOTE: routine is HIGH-PRIORITY. use try_lock avoid thread blocks.
   set_msg v(set_msg::INVALID_MSG);
   int queue_i = 0;
-  const int max_queue_items = 10; //TODO: user-configurable?
+  const int max_queue_items = 50; //TODO: user-configurable?
   while (queue_i < max_queue_items)
   {
 		if (!m_setter_queue.try_pop(v))

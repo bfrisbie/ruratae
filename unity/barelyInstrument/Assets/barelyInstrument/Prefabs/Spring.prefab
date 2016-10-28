@@ -92,9 +92,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   particleA: {fileID: 0}
   particleB: {fileID: 0}
-  stiffness: 0
-  damping: 0
-  restLength: 1
+  stiffness: 3000000
+  damping: 2000000
+  restLength: 0
 --- !u!136 &136000011946308288
 CapsuleCollider:
   m_ObjectHideFlags: 1
