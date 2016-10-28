@@ -43,8 +43,11 @@ public class Particle : MonoBehaviour, IPointerDownHandler, IPointerUpHandler, I
     //transform.localScale = Vector3.Lerp(transform.localScale, radius * Vector3.one, 
     //                                    4 * Time.deltaTime);
     transform.GetComponent<Renderer>().material.color = (0.5f + recipMass) * Color.white;
-    // Update parameters.
-    Ruratae.SetParticleParams(this);
+    if(Input.GetMouseButton(0)) {
+      // Update parameters.
+      // TODO(anokta): Handle this properly to get the position from ruratae otherwise.
+      Ruratae.SetParticleParams(this);
+    }
   }
 
   // Implements |IPointerDownHandler.OnPointerDown|.
@@ -55,8 +58,10 @@ public class Particle : MonoBehaviour, IPointerDownHandler, IPointerUpHandler, I
 
   // Implements |IPointerUpHandler.OnPointerUp|.
   public void OnPointerUp (PointerEventData eventData) {
-    if (Input.GetMouseButtonUp(1)) {
+    if(Input.GetMouseButtonUp(1)) {
       recipMass = 1.0f - recipMass;
+      velocity = recipMass * Vector3.up;
+      Ruratae.SetParticleParams(this);
     } else if (!eventData.dragging) {
       GameObject.Destroy(gameObject);
     }

@@ -90,9 +90,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: feb092a5f545af84d89d0bd1dc4eb032, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  velocity: {x: 0, y: 0, z: 0}
+  velocity: {x: 1, y: 0, z: 0}
   recipMass: 1
-  radius: 1
+  radius: 0
   elasticity: 0
 --- !u!135 &135000013549774362
 SphereCollider:
